@@ -44,7 +44,7 @@ class Network(BaseNetwork):
         self.register_buffer('posterior_mean_coef1', to_torch(betas * np.sqrt(gammas_prev) / (1. - gammas)))
         self.register_buffer('posterior_mean_coef2', to_torch((1. - gammas_prev) * np.sqrt(alphas) / (1. - gammas)))
 
-    def predict_start_from_noise(self, y_t, t, noise):
+    def predict_start_from_noise(self, y_t, t, noise): # denoise process
         return (
             extract(self.sqrt_recip_gammas, t, y_t.shape) * y_t -
             extract(self.sqrt_recipm1_gammas, t, y_t.shape) * noise

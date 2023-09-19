@@ -13,5 +13,5 @@ if __name__ == '__main__':
     print(img_dir)
     files = glob.glob(img_dir+'/*.png')
     print(len(files))
-    I = np.asarray(Image.open(files[0]))
+    I = np.asarray(Image.open(files[366]))
     print(I.shape)

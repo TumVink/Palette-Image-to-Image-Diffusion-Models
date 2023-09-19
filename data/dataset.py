@@ -175,7 +175,7 @@ class ColorizationDataset(data.Dataset):
 
 
 class BCI_Dataset(data.Dataset):
-    def __init__(self, data_root, data_flist, data_len=-1, image_size=[224, 224], loader=pil_loader):
+    def __init__(self, data_root, data_len=-1, image_size=[1024, 1024], loader=pil_loader):
         self.data_root = data_root
         flist = make_dataset(data_flist)
         if data_len > 0:
@@ -194,8 +194,8 @@ class BCI_Dataset(data.Dataset):
         ret = {}
         file_name = str(self.flist[index]).zfill(5) + '.png'
 
-        img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'color', file_name)))
-        cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'gray', file_name)))
+        img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name)))
+        cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE', file_name)))
 
         ret['gt_image'] = img
         ret['cond_image'] = cond_image
