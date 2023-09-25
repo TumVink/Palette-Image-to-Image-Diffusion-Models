@@ -5,7 +5,7 @@ import os
 import torch
 import numpy as np
 
-from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
+#from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
@@ -21,11 +21,13 @@ def make_dataset(dir):
     else:
         images = []
         assert os.path.isdir(dir), '%s is not a valid directory' % dir
+        dir = dir + 'HE/' # hard-coding so images contain only ['00000_train_1+.png', '00001_train_3+.png']
         for root, _, fnames in sorted(os.walk(dir)):
+            #print(root)
             for fname in sorted(fnames):
                 if is_image_file(fname):
-                    path = os.path.join(root, fname)
-                    images.append(path)
+                    #path = os.path.join(root, fname)
+                    images.append(fname)
 
     return images
 
@@ -177,25 +179,27 @@ class ColorizationDataset(data.Dataset):
 class BCI_Dataset(data.Dataset):
     def __init__(self, data_root, data_len=-1, image_size=[1024, 1024], loader=pil_loader):
         self.data_root = data_root
-        flist = make_dataset(data_flist)
+        imgs = make_dataset(data_root)
         if data_len > 0:
-            self.flist = flist[:int(data_len)]
+            self.imgs = imgs[:int(data_len)]
         else:
-            self.flist = flist
+            self.imgs = imgs
         self.tfs = transforms.Compose([
-            transforms.Resize((image_size[0], image_size[1])),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                transforms.Resize((image_size[0], image_size[1])),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
         ])
+
         self.loader = loader
         self.image_size = image_size
+        # print(self.image_size)
 
     def __getitem__(self, index):
         ret = {}
-        file_name = str(self.flist[index]).zfill(5) + '.png'
+        file_name = self.imgs[index]
 
         img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name)))
-        cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE', file_name)))
+        cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name)))
 
         ret['gt_image'] = img
         ret['cond_image'] = cond_image
@@ -203,5 +207,8 @@ class BCI_Dataset(data.Dataset):
         return ret
 
     def __len__(self):
-        return len(self.flist)
+        return len(self.imgs)
 
+if __name__ == "__main__":
+    imgs = make_dataset("/mnt/data/BCI/train/")
+    print(len(imgs))

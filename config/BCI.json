@@ -1,6 +1,6 @@
 {
     "name": "BCI", // experiments name
-    "gpu_ids": [0], // gpu ids list, default is single 0
+    "gpu_ids": [0,3], // gpu ids list, default is single 0
     "seed" : -1, // random seed, seed <0 represents randomization not used
     "finetune_norm": false, // find the parameters to optimize
 
@@ -19,22 +19,35 @@
             "which_dataset": {  // import designated dataset using arguments
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root":'/mnt/data/BCI/train/',
-                    "data_len": -1
+                    "data_root":"/mnt/data/BCI/train/",
+                    "data_len": -1,
+                    "image_size": [512,512]
 //                    "mask_config": {
 //                        "mask_mode": "hybrid" // onedirection | fourdirection | hybrid | manual
 //                    }
                 }
             },
-            "dataloader":{
-                "validation_split": 2, // percent or number //todo
+
+            "dataloader": {
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 4, // batch size in each gpu
-                    "num_workers": 4,
+                    "batch_size": 1, // batch size in each gpu
+                    "num_workers": 1,
                     "shuffle": true,
                     "pin_memory": true,
                     "drop_last": false
-                },
+                }
+            }
+        },
+        "val": {
+            "which_dataset": {  // import designated dataset using arguments
+                "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
+                "args":{ // arguments to initialize dataset
+                    "data_root":"/mnt/data/BCI/val/",
+                    "data_len": -1,
+                    "image_size": [512,512]
+                }
+            },
+            "dataloader":{
                 "val_args":{ // arguments to initialize valid_dataloader, will overwrite the parameters in train_dataloader
                     "batch_size": 1, // batch size in each gpu
                     "num_workers": 4,
@@ -44,6 +57,7 @@
                 }
             }
         },
+
         "test": {
             "which_dataset": {
                 "name": "BCI_Dataset", // import Dataset() class / function(not recommend) from default file
@@ -57,7 +71,7 @@
             },
             "dataloader":{
                 "args":{
-                    "batch_size": 8,
+                    "batch_size": 4,
                     "num_workers": 4,
                     "pin_memory": true
                 }
@@ -105,7 +119,7 @@
                         "num_head_channels": 32,
                         "res_blocks": 2,
                         "dropout": 0.2,
-                        "image_size": 1024
+                        "image_size": 512
                     },
                     "beta_schedule": {
                         "train": {
@@ -141,9 +155,9 @@
     },
 
     "train": { // arguments for basic training
-        "n_epoch": 1e8, // max epochs, not limited now
+        "n_epoch": 100, // max epochs, not limited now
         "n_iter": 1e8, // max interations
-        "val_epoch": 1, // valdation every specified number of epochs
+        "val_epoch": 10, // valdation every specified number of epochs
         "save_checkpoint_epoch": 10,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable

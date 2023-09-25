@@ -1,1 +1,14 @@
-1. git push
+1. Git Update:
+    git add .
+    git commit -m ""
+    git push -u origin main
+
+2. Run script:
+    python run.py -p train -c config/BCI.json -gpu 3
+
+
+
+3. Run tensorboard remotely:
+    local: ssh -L 16006:127.0.0.1:6006 ge54xof@172.21.134.105
+    remote: tensorboard --logdir experiments/train_BCI_230920_174836/
+    local: http://127.0.0.1:16006
