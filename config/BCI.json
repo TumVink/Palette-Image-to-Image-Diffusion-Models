@@ -42,7 +42,7 @@
             "which_dataset": {  // import designated dataset using arguments
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root":"/mnt/data/BCI/val/",
+                    "data_root":"/mnt/data/BCI/val_5/",
                     "data_len": -1,
                     "image_size": [512,512]
                 }
@@ -124,7 +124,7 @@
                     "beta_schedule": {
                         "train": {
                             "schedule": "linear",
-                            "n_timestep": 2000,
+                            "n_timestep": 1000,
                             // "n_timestep": 5, // debug
                             "linear_start": 1e-6,
                             "linear_end": 0.01
@@ -159,7 +159,7 @@
         "n_iter": 1e8, // max interations
         "val_epoch": 10, // valdation every specified number of epochs
         "save_checkpoint_epoch": 10,
-        "log_iter": 1e4, // log every specified number of iterations
+        "log_iter": 10, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
 
