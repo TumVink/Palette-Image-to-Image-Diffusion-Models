@@ -16,3 +16,12 @@
 
  4. Count file numbers
      ls -1 | wc -l
+
+
+
+
+
+ Some potential ideas:
+    change batchnorm to groupnorm or inverse
+    BBDM
+    LDM

@@ -150,6 +150,7 @@ class BaseModel():
 
         self.logger.info('Loading training state for [{:s}] ...'.format(state_path))
         resume_state = torch.load(state_path, map_location = lambda storage, loc: self.set_device(storage))
+        print('loading pre-trained model')
         
         resume_optimizers = resume_state['optimizers']
         resume_schedulers = resume_state['schedulers']

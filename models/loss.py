@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
+from torch import optim
 
 # class mse_loss(nn.Module):
 #     def __init__(self) -> None:
@@ -47,20 +48,27 @@ class FocalLoss(nn.Module):
         if self.size_average: return loss.mean()
         else: return loss.sum()
 
-def ssim_loss(output,target):
-    ssim_loss = SSIM(win_size=11, win_sigma=1.5, data_range=1, size_average=True, channel=1)
+def ssim_loss(output,target,mode='ssim'):
 
-    optimizer = optim.Adam([img2], lr=0.01)
+    if mode=='ssim':
+        ssim_module = SSIM(win_size=11, win_sigma=1.5, data_range=1, size_average=True, channel=3, nonnegative_ssim=False)
+    else:
+        ssim_module = MS_SSIM(win_size=11, win_sigma=1.5, data_range=1, size_average=True, channel=3)
 
-    while ssim_value < 0.9999:
-        optimizer.zero_grad()
-        _ssim_loss = 1 - ssim_loss(img1, img2)
-        _ssim_loss.backward()
-        optimizer.step()
+    ssim_loss = 1 - ssim_module(output, target)
+    return ssim_loss
 
-        ssim_value = ssim(img1, img2).item()
-        print(ssim_value)
-
-    img2_ = (img2 * 255.0).squeeze()
-    np_img2 = img2_.detach().cpu().numpy().astype(np.uint8)
-    Image.fromarray(np_img2).save('results.png')
+    # _ssim_loss = 1 - ssim_loss(target, output)
+    #
+    # while ssim_value < 0.9999:
+    #     optimizer.zero_grad()
+    #     _ssim_loss = 1 - ssim_loss(img1, img2)
+    #     _ssim_loss.backward()
+    #     optimizer.step()
+    #
+    #     ssim_value = ssim(img1, img2).item()
+    #     print(ssim_value)
+    #
+    # img2_ = (img2 * 255.0).squeeze()
+    # np_img2 = img2_.detach().cpu().numpy().astype(np.uint8)
+    # Image.fromarray(np_img2).save('results.png')

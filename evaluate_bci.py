@@ -24,6 +24,7 @@ def psnr_and_ssim(result_path):
             try:
                 fake = cv.imread(os.path.join(result_path,i))
                 real = cv.imread(os.path.join(result_path,i.replace('GT','Out')))
+                print(real)
                 PSNR = peak_signal_noise_ratio(fake, real)
                 psnr.append(PSNR)
                 SSIM = structural_similarity(fake, real, multichannel=True)
@@ -32,6 +33,7 @@ def psnr_and_ssim(result_path):
                 print("there is something wrong with " + i)
         else:
             continue
+        break
     average_psnr=sum(psnr)/len(psnr)
     average_ssim=sum(ssim)/len(ssim)
     print("The average psnr is " + str(average_psnr))

@@ -5,6 +5,7 @@ from torch.nn import functional as F
 import torch.utils.data
 
 from torchvision.models.inception import inception_v3
+from pytorch_msssim import ssim, ms_ssim
 
 import numpy as np
 from scipy.stats import entropy
@@ -15,6 +16,17 @@ def mae(input, target):
         output = loss(input, target)
     return output
 
+def ssim(input,target,mode='ssim'):
+
+    input = (input + 1) / 2  # [-1, 1] => [0, 1]
+    target = (target + 1) / 2
+
+    if mode=='ssim':
+        output = ssim(input,target,data_range=1,size_average=True)
+    else:
+        output = ms_ssim(input,target,data_range=1,size_average=True)
+
+    return output
 
 def inception_score(imgs, cuda=True, batch_size=32, resize=False, splits=1):
     """Computes the inception score of the generated images imgs

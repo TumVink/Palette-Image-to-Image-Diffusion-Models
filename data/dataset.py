@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import torch
 import numpy as np
+from torchvision.utils import save_image
 
 #from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -155,7 +156,7 @@ class ColorizationDataset(data.Dataset):
         self.tfs = transforms.Compose([
                 transforms.Resize((image_size[0], image_size[1])),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
+                #transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
         ])
         self.loader = loader
         self.image_size = image_size
@@ -199,6 +200,7 @@ class BCI_Dataset(data.Dataset):
         file_name = self.imgs[index]
 
         img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name)))
+        #print('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
         cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name)))
 
         ret['gt_image'] = img
@@ -210,5 +212,16 @@ class BCI_Dataset(data.Dataset):
         return len(self.imgs)
 
 if __name__ == "__main__":
-    imgs = make_dataset("/mnt/data/BCI/train/")
-    print(len(imgs))
+    # imgs = make_dataset("/mnt/data/BCI/train/")
+    bci = BCI_Dataset("/mnt/data/BCI/train/")
+    for (batch_idx, batch) in enumerate(bci):
+        print("\nBatch = " + str(batch_idx))
+        X = batch['gt_image']  # [3,7]
+        Y = batch['cond_image']  # [3]
+        break
+
+    # save_image(X, 'viz/gt_image.png')
+    # save_image(Y, 'viz/cond_image.png')
+    print(Y)
+
+    #print(torch.mean(Y, dim=0, keepdim=False, out=None))
