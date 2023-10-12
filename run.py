@@ -53,16 +53,15 @@ def main_worker(gpu, ngpus_per_node, opt):
     )
 
     phase_logger.info('Begin model {}.'.format(opt['phase']))
-    #try:
-    if opt['phase'] == 'train':
-        model.train()
-    else:
-        #print("test")
-        model.test()
-    # except:
-    #     print("123")
-    # finally:
-    #     phase_writer.close()
+    try:
+        if opt['phase'] == 'train':
+            model.train()
+        else:
+            #print("test")
+            model.test()
+
+    finally:
+        phase_writer.close()
         
         
 if __name__ == '__main__':

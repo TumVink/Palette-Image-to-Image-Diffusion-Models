@@ -52,7 +52,6 @@ class Palette(BaseModel):
         self.train_metrics = LogTracker(*[m.__name__ for m in losses], phase='train')
         self.val_metrics = LogTracker(*[m.__name__ for m in self.metrics], phase='val')
         self.test_metrics = LogTracker(*[m.__name__ for m in self.metrics], phase='test')
-        print("metrcis")
 
         self.sample_num = sample_num
         self.task = task

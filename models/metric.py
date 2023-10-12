@@ -18,9 +18,9 @@ def mae(input, target):
 
 def ssim_metric(input,target,mode='ssim'):
 
+    #print(target.min())
     input = (input + 1) / 2  # [-1, 1] => [0, 1]
     target = (target + 1) / 2
-    print(target[0,:,0,0].max())
 
     if mode=='ssim':
         output = ssim(input,target,data_range=1,size_average=True)
