@@ -53,13 +53,16 @@ def main_worker(gpu, ngpus_per_node, opt):
     )
 
     phase_logger.info('Begin model {}.'.format(opt['phase']))
-    try:
-        if opt['phase'] == 'train':
-            model.train()
-        else:
-            model.test()
-    finally:
-        phase_writer.close()
+    #try:
+    if opt['phase'] == 'train':
+        model.train()
+    else:
+        #print("test")
+        model.test()
+    # except:
+    #     print("123")
+    # finally:
+    #     phase_writer.close()
         
         
 if __name__ == '__main__':
@@ -69,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch', type=int, default=None, help='Batch size in every gpu')
     parser.add_argument('-gpu', '--gpu_ids', type=str, default=None)
     parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('-P', '--port', default='21012', type=str)
+    parser.add_argument('-P', '--port', default='21013', type=str) #default：21012
 
     ''' parser configs '''
     args = parser.parse_args()

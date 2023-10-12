@@ -22,7 +22,7 @@ def make_dataset(dir):
     else:
         images = []
         assert os.path.isdir(dir), '%s is not a valid directory' % dir
-        dir = dir + 'HE/' # hard-coding so images contain only ['00000_train_1+.png', '00001_train_3+.png']
+        dir = dir + '/HE/' # hard-coding so images contain only ['00000_train_1+.png', '00001_train_3+.png']
         for root, _, fnames in sorted(os.walk(dir)):
             #print(root)
             for fname in sorted(fnames):
@@ -180,6 +180,7 @@ class ColorizationDataset(data.Dataset):
 class BCI_Dataset(data.Dataset):
     def __init__(self, data_root, data_len=-1, image_size=[1024, 1024], loader=pil_loader):
         self.data_root = data_root
+        #print(self.data_root)
         imgs = make_dataset(data_root)
         if data_len > 0:
             self.imgs = imgs[:int(data_len)]
@@ -199,6 +200,7 @@ class BCI_Dataset(data.Dataset):
         ret = {}
         file_name = self.imgs[index]
 
+
         img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name)))
         #print('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
         cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name)))
@@ -210,6 +212,7 @@ class BCI_Dataset(data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
+
 
 if __name__ == "__main__":
     # imgs = make_dataset("/mnt/data/BCI/train/")

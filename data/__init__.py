@@ -45,6 +45,7 @@ def define_dataset(logger, opt):
 
     valid_len = len(val_dataset)
     data_len = len(phase_dataset)
+    #print(data_len)
     if 'debug' in opt['name']:
         debug_split = opt['debug'].get('debug_split', 1.0)
         if isinstance(debug_split, int):

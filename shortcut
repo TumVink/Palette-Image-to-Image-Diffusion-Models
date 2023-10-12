@@ -18,10 +18,9 @@
      ls -1 | wc -l
 
 
-
-
-
  Some potential ideas:
-    change batchnorm to groupnorm or inverse
+    change batchnorm to groupnorm or inverse -- donot work
+    longer training
     BBDM
     LDM
+    delete dropout  -- fine

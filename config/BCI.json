@@ -1,6 +1,6 @@
 {
-    "name": "BCI", // experiments name
-    "gpu_ids": [0,3], // gpu ids list, default is single 0
+    "name": "Longer train", // experiments name
+    "gpu_ids": [2,3], // 0,1 are the GeForce3090 ones
     "seed" : -1, // random seed, seed <0 represents randomization not used
     "finetune_norm": false, // find the parameters to optimize
 
@@ -10,7 +10,8 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": "/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_230925_151941/checkpoint/10"
+        "resume_state": "/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_231005_154058/checkpoint/100"
+        //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_230925_151941/checkpoint/10"
         //"resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
@@ -19,7 +20,7 @@
             "which_dataset": {  // import designated dataset using arguments
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root":"/mnt/data/BCI/train/",
+                    "data_root":"/mnt/data/BCI/train",
                     "data_len": -1,
                     "image_size": [512,512]
 //                    "mask_config": {
@@ -42,7 +43,7 @@
             "which_dataset": {  // import designated dataset using arguments
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root":"/mnt/data/BCI/val_5/",
+                    "data_root":"/mnt/data/BCI/val_5",
                     "data_len": -1,
                     "image_size": [512,512]
                 }
@@ -60,19 +61,19 @@
 
         "test": {
             "which_dataset": {
-                "name": "BCI_Dataset", // import Dataset() class / function(not recommend) from default file
+                "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "/mnt/data/BCI/test/"
-//                    "mask_config": {
-//                        "mask_mode": "onedirection",  //todo
-//                        "shape": []
-//                    }
+                    "data_root": "/mnt/data/BCI/val_5",
+                    "data_len": -1,
+                    "image_size": [512,512]
                 }
             },
             "dataloader":{
                 "args":{
-                    "batch_size": 4,
-                    "num_workers": 4,
+                    "batch_size": 1,
+                    "num_workers": 2,
+                    "shuffle": false,
+                    "drop_last": false,
                     "pin_memory": true
                 }
             }
@@ -88,7 +89,7 @@
                 "ema_scheduler": {
                     "ema_start": 1,
                     "ema_iter": 1,
-                    "ema_decay": 0.9999
+                    "ema_decay": 0.995
                 },
                 "optimizers": [
                     { "lr": 5e-5, "weight_decay": 0}
@@ -131,7 +132,7 @@
                         },
                         "test": {
                             "schedule": "linear",
-                            "n_timestep": 2000,
+                            "n_timestep": 100,
                             "linear_start": 1e-4,
                             "linear_end": 0.09
                         }
@@ -150,13 +151,13 @@
             "mse_loss" // import mse_loss() function/class from default file (default is [models/losses.py]), equivalent to { "name": "mse_loss", "args":{}}
         ],
         "which_metrics": [ // import designated list of metrics without arguments
-            "mae" // import mae() function/class from default file (default is [models/metrics.py]), equivalent to { "name": "mae", "args":{}}
+            "ssim_metric" // import mae() function/class from default file (default is [models/metrics.py]), equivalent to { "name": "mae", "args":{}}
         ]
     },
 
     "train": { // arguments for basic training
-        "n_epoch": 100, // max epochs, not limited now
-        "n_iter": 1e8, // max interations
+        "n_epoch": 300, // max epochs, not limited now
+        "n_iter": 1e9, // max interations
         "val_epoch": 10, // valdation every specified number of epochs
         "save_checkpoint_epoch": 10,
         "log_iter": 10, // log every specified number of iterations
