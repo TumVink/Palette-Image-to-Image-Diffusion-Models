@@ -10,7 +10,7 @@ import argparse
 def parse_opt():
 #Set train options
     parser = argparse.ArgumentParser(description='Evaluate options')
-    parser.add_argument('--result_path', type=str, default='/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_230920_174836/results/val/10/', help='results saved path')
+    parser.add_argument('--result_path', type=str, default='/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_size=256_231024_155821/results/val/', help='results saved path')
     opt = parser.parse_args()
     return opt
 opt = parse_opt()
@@ -23,8 +23,8 @@ def psnr_and_ssim(result_path):
         if 'GT' in i:
             try:
                 fake = cv.imread(os.path.join(result_path,i))
-                real = cv.imread(os.path.join(result_path,i.replace('GT','Out')))
-                print(real)
+                real = cv.imread(os.path.join(result_path,i.replace('GT','Input')))
+                #print(real)
                 PSNR = peak_signal_noise_ratio(fake, real)
                 psnr.append(PSNR)
                 SSIM = structural_similarity(fake, real, multichannel=True)
@@ -39,4 +39,10 @@ def psnr_and_ssim(result_path):
     print("The average psnr is " + str(average_psnr))
     print("The average ssim is " + str(average_ssim))
 
-psnr_and_ssim(opt.result_path)
+for sub_dir in os.walk(opt.result_path):
+    epoch_dir = sub_dir[0]
+    if epoch_dir != opt.result_path:
+        print(epoch_dir)
+        psnr_and_ssim(epoch_dir)
+
+#psnr_and_ssim(opt.result_path)

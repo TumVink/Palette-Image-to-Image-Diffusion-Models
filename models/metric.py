@@ -17,6 +17,7 @@ def mae(input, target):
     return output
 
 def ssim_metric(input,target,mode='ssim'):
+    # ssim_score: 1 highest
 
     #print(target.min())
     input = (input + 1) / 2  # [-1, 1] => [0, 1]
@@ -86,3 +87,11 @@ def inception_score(imgs, cuda=True, batch_size=32, resize=False, splits=1):
         split_scores.append(np.exp(np.mean(scores)))
 
     return np.mean(split_scores), np.std(split_scores)
+
+if __name__ == "__main__":
+    input = torch.randn(1,3,10,10)
+    target = torch.randn(1,3,10,10)
+
+    ssim_score = ssim_metric(input,input)
+    print(ssim_score)
+    assert ssim_score > 0.99

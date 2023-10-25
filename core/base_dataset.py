@@ -30,7 +30,7 @@ def pil_loader(path):
     return Image.open(path).convert('RGB')
 
 class BaseDataset(data.Dataset):
-    def __init__(self, data_root, image_size=[256, 256], loader=pil_loader):
+    def __init__(self, data_root, image_size=[256, 256], loader=pil_loader,crop_size=[256,256]):
         self.imgs = make_dataset(data_root)
         self.tfs = transforms.Compose([
                 transforms.Resize((image_size[0], image_size[1])),

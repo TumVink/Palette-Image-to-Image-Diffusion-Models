@@ -5,6 +5,7 @@ import os
 import torch
 import numpy as np
 from torchvision.utils import save_image
+import torchvision.transforms.functional as TF
 
 #from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -178,7 +179,7 @@ class ColorizationDataset(data.Dataset):
 
 
 class BCI_Dataset(data.Dataset):
-    def __init__(self, data_root, data_len=-1, image_size=[1024, 1024], loader=pil_loader):
+    def __init__(self, data_root, data_len=-1, image_size=[1024,1024], loader=pil_loader,crop_size=None):
         self.data_root = data_root
         #print(self.data_root)
         imgs = make_dataset(data_root)
@@ -186,24 +187,35 @@ class BCI_Dataset(data.Dataset):
             self.imgs = imgs[:int(data_len)]
         else:
             self.imgs = imgs
+
         self.tfs = transforms.Compose([
-                transforms.Resize((image_size[0], image_size[1])),
+                #transforms.Resize((image_size[0], image_size[1])),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
         ])
 
         self.loader = loader
         self.image_size = image_size
-        # print(self.image_size)
+        self.crop_size = crop_size
 
     def __getitem__(self, index):
         ret = {}
         file_name = self.imgs[index]
 
+        img = self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
+        cond_image = self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name))
 
-        img = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name)))
+        if self.crop_size:
+            image_placeholder = torch.zeros([3, self.image_size[0], self.image_size[0]])
+            i, j, h, w = transforms.RandomCrop.get_params(
+                image_placeholder, output_size=self.crop_size)
+            #print(i, j, h, w)
+            img = TF.crop(img,i, j, h, w)
+            cond_image = TF.crop(cond_image, i, j, h, w)
+
+        img = self.tfs(img)
         #print('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
-        cond_image = self.tfs(self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name)))
+        cond_image = self.tfs(cond_image)
 
         ret['gt_image'] = img
         ret['cond_image'] = cond_image
@@ -221,10 +233,10 @@ if __name__ == "__main__":
         print("\nBatch = " + str(batch_idx))
         X = batch['gt_image']  # [3,7]
         Y = batch['cond_image']  # [3]
-        break
+        #break
 
     # save_image(X, 'viz/gt_image.png')
     # save_image(Y, 'viz/cond_image.png')
-    print(Y)
+    #print(Y)
 
     #print(torch.mean(Y, dim=0, keepdim=False, out=None))

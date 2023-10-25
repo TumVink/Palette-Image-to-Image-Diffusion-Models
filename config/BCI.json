@@ -1,5 +1,5 @@
 {
-    "name": "Longer train", // experiments name
+    "name": "size=256", // experiments name
     "gpu_ids": [2,3], // 0,1 are the GeForce3090 ones
     "seed" : -1, // random seed, seed <0 represents randomization not used
     "finetune_norm": false, // find the parameters to optimize
@@ -10,7 +10,7 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": "/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_231005_154058/checkpoint/100"
+        "resume_state": null //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_Longer train_231012_173536/checkpoint/120"
         //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_230925_151941/checkpoint/10"
         //"resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
@@ -22,7 +22,8 @@
                 "args":{ // arguments to initialize dataset
                     "data_root":"/mnt/data/BCI/train",
                     "data_len": -1,
-                    "image_size": [512,512]
+                    "image_size": [1024,1024],
+                    "crop_size": [256,256]
 //                    "mask_config": {
 //                        "mask_mode": "hybrid" // onedirection | fourdirection | hybrid | manual
 //                    }
@@ -31,7 +32,7 @@
 
             "dataloader": {
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 1, // batch size in each gpu
+                    "batch_size": 6, // batch size in each gpu
                     "num_workers": 1,
                     "shuffle": true,
                     "pin_memory": true,
@@ -43,9 +44,10 @@
             "which_dataset": {  // import designated dataset using arguments
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root":"/mnt/data/BCI/val_5",
+                    "data_root":"/mnt/data/BCI/train+val_3+3",
                     "data_len": -1,
-                    "image_size": [512,512]
+                    "image_size": [1024,1024],
+                    "crop_size": [256,256]
                 }
             },
             "dataloader":{
@@ -65,7 +67,8 @@
                 "args":{
                     "data_root": "/mnt/data/BCI/val_5",
                     "data_len": -1,
-                    "image_size": [512,512]
+                    "image_size": [1024,1024],
+                    "crop_size": [256,256]
                 }
             },
             "dataloader":{
@@ -120,7 +123,7 @@
                         "num_head_channels": 32,
                         "res_blocks": 2,
                         "dropout": 0.2,
-                        "image_size": 512
+                        "image_size": 256
                     },
                     "beta_schedule": {
                         "train": {
@@ -132,7 +135,7 @@
                         },
                         "test": {
                             "schedule": "linear",
-                            "n_timestep": 2000,
+                            "n_timestep": 1000,
                             "linear_start": 1e-4,
                             "linear_end": 0.09
                         }
@@ -156,11 +159,11 @@
     },
 
     "train": { // arguments for basic training
-        "n_epoch": 300, // max epochs, not limited now
+        "n_epoch": 1000, // max epochs, not limited now
         "n_iter": 1e9, // max interations
-        "val_epoch": 10, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 10,
-        "log_iter": 10, // log every specified number of iterations
+        "val_epoch": 50, // valdation every specified number of epochs
+        "save_checkpoint_epoch": 50,
+        "log_iter": 100, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
 
