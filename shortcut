@@ -27,4 +27,18 @@
     LDM
     Bigger batchsize + random crop + train longer
     delete dropout  -- fine
-    1-ss
+    Huge batchsize (6*2,crop 224, mse loss, otherwise default):
+          MSE loss + crop to 224
+            The average psnr is 13.412870116163292
+            The average ssim is 0.5150041990810806
+    1-ss:
+          With new loss and resize to 224
+          Numbers:
+            The average psnr is 16.569598711078623
+            The average ssim is 0.42707161230791724
+    Data-Augment:
+
+
+
+
+

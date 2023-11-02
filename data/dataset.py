@@ -6,6 +6,8 @@ import torch
 import numpy as np
 from torchvision.utils import save_image
 import torchvision.transforms.functional as TF
+#from util.auto_augment import PathAugment
+from augment.augment.randaugment import distort_image_with_randaugment
 
 #from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -205,6 +207,11 @@ class BCI_Dataset(data.Dataset):
         img = self.loader('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
         cond_image = self.loader('{}/{}/{}'.format(self.data_root, 'HE',file_name))
 
+        # AutoAug
+        # AutoAug = PathAugment()
+        # cond_image = AutoAug(cond_image)
+        cond_image = distort_image_with_randaugment(cond_image,6,5)
+
         if self.crop_size:
             image_placeholder = torch.zeros([3, self.image_size[0], self.image_size[0]])
             i, j, h, w = transforms.RandomCrop.get_params(
@@ -216,6 +223,8 @@ class BCI_Dataset(data.Dataset):
         img = self.tfs(img)
         #print('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
         cond_image = self.tfs(cond_image)
+
+
 
         ret['gt_image'] = img
         ret['cond_image'] = cond_image
@@ -230,13 +239,14 @@ if __name__ == "__main__":
     # imgs = make_dataset("/mnt/data/BCI/train/")
     bci = BCI_Dataset("/mnt/data/BCI/train/")
     for (batch_idx, batch) in enumerate(bci):
-        print("\nBatch = " + str(batch_idx))
-        X = batch['gt_image']  # [3,7]
+        #print("\nBatch = " + str(batch_idx))
+        #X = batch['gt_image']  # [3,7]
         Y = batch['cond_image']  # [3]
-        #break
+        save_image(Y, 'data/viz/translate_new.png')
+        break
 
-    # save_image(X, 'viz/gt_image.png')
-    # save_image(Y, 'viz/cond_image.png')
+    #save_image(X, 'viz/gt_image.png')
+    #save_image(Y, 'data/viz/translate.png')
     #print(Y)
 
     #print(torch.mean(Y, dim=0, keepdim=False, out=None))

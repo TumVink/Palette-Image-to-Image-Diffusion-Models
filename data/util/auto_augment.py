@@ -1,7 +1,7 @@
 import random
 import numpy as np
-from scipy import ndimage
-from PIL import Image, ImageEnhance, ImageOps
+from scipy import ndimage, color
+from PIL import Image, ImageEnhance, ImageOps, ImageFilter
 
 
 class AutoAugment(object):
@@ -32,6 +32,40 @@ class AutoAugment(object):
             ['AutoContrast', 0.9, 2, 'Solarize', 0.8, 3],
             ['Equalize', 0.8, 8, 'Invert', 0.1, 3],
             ['TranslateY', 0.7, 9, 'AutoContrast', 0.9, 1],
+        ]
+
+    def __call__(self, img):
+        img = apply_policy(img, self.policies[random.randrange(len(self.policies))])
+        return img
+
+class PathAugment(object):
+    def __init__(self):
+        self.policies = [
+            # ['Invert', 0.1, 7, 'Contrast', 0.2, 6],
+            # ['Rotate', 0.7, 2, 'TranslateX', 0.3, 9],
+            # ['Sharpness', 0.8, 1, 'Sharpness', 0.9, 3],
+            # ['ShearY', 0.5, 8, 'TranslateY', 0.7, 9],
+            # ['AutoContrast', 0.5, 8, 'Equalize', 0.9, 2],
+            # ['ShearY', 0.2, 7, 'Posterize', 0.3, 7],
+            # ['Color', 0.4, 3, 'Brightness', 0.6, 7],
+            # ['Sharpness', 0.3, 9, 'Brightness', 0.7, 9],
+            # ['Equalize', 0.6, 5, 'Equalize', 0.5, 1],
+            # ['Contrast', 0.6, 7, 'Sharpness', 0.6, 5],
+            # ['Color', 0.7, 7, 'TranslateX', 0.5, 8],
+            # ['Equalize', 0.3, 7, 'AutoContrast', 0.4, 8],
+            ['TranslateY', 0.99, 2, 'Sharpness', 0.0, 6],
+            # ['Brightness', 0.9, 6, 'Color', 0.2, 8],
+            # ['Solarize', 0.5, 2, 'Invert', 0, 0.3],
+            # ['Equalize', 0.2, 0, 'AutoContrast', 0.6, 0],
+            # ['Equalize', 0.2, 8, 'Equalize', 0.6, 4],
+            # ['Color', 0.9, 9, 'Equalize', 0.6, 6],
+            # ['AutoContrast', 0.8, 4, 'Solarize', 0.2, 8],
+            # ['Brightness', 0.1, 3, 'Color', 0.7, 0],
+            # ['Solarize', 0.4, 5, 'AutoContrast', 0.9, 3],
+            # ['TranslateY', 0.9, 9, 'TranslateY', 0.7, 9],
+            # ['AutoContrast', 0.9, 2, 'Solarize', 0.8, 3],
+            # ['Equalize', 0.8, 8, 'Invert', 0.1, 3],
+            # ['TranslateY', 0.7, 9, 'AutoContrast', 0.9, 1],
         ]
 
     def __call__(self, img):
@@ -149,7 +183,7 @@ def shear_y(img, magnitude):
 
 def translate_x(img, magnitude):
     img = np.array(img)
-    magnitudes = np.linspace(-150/331, 150/331, 11)
+    magnitudes = np.linspace(-100/331, 100/331, 11)
 
     transform_matrix = np.array([[1, 0, 0],
                                  [0, 1, img.shape[1]*random.uniform(magnitudes[magnitude], magnitudes[magnitude+1])],
@@ -165,9 +199,9 @@ def translate_x(img, magnitude):
     return img
 
 
-def translate_y(img, magnitude):
+def translate_y(img, magnitude,mode='wrap'):
     img = np.array(img)
-    magnitudes = np.linspace(-150/331, 150/331, 11)
+    magnitudes = np.linspace(-100/331, 100/331, 11)
 
     transform_matrix = np.array([[1, 0, img.shape[0]*random.uniform(magnitudes[magnitude], magnitudes[magnitude+1])],
                                  [0, 1, 0],
@@ -175,10 +209,12 @@ def translate_y(img, magnitude):
     transform_matrix = transform_matrix_offset_center(transform_matrix, img.shape[0], img.shape[1])
     affine_matrix = transform_matrix[:2, :2]
     offset = transform_matrix[:2, 2]
+    median_array = ndimage.median(img)
+    #print(median_array)
     img = np.stack([ndimage.interpolation.affine_transform(
                     img[:, :, c],
                     affine_matrix,
-                    offset) for c in range(img.shape[2])], axis=2)
+                    offset,mode=mode) for c in range(img.shape[2])], axis=2)
     img = Image.fromarray(img)
     return img
 
@@ -250,6 +286,26 @@ def sharpness(img, magnitude):
     magnitudes = np.linspace(0.1, 1.9, 11)
     img = ImageEnhance.Sharpness(img).enhance(random.uniform(magnitudes[magnitude], magnitudes[magnitude+1]))
     return img
+
+def gaussian_blur(img, magnitude=0.5):
+    #set 0.5 as default radius
+    img.filter(ImageFilter.GaussianBlur(radius=magnitude))
+    return img
+
+def HEDJitter(img, magnitude=0.05):
+    theta = magnitude
+    self.alpha = np.random.uniform(1 - theta, 1 + theta, (1, 3))
+    self.betti = np.random.uniform(-theta, theta, (1, 3))
+
+    img = np.array(img)
+    s = np.reshape(color.rgb2hed(img), (-1, 3))
+    ns = alpha * s + betti  # perturbations on HED color space
+    nimg = color.hed2rgb(np.reshape(ns, img.shape))
+    imin = nimg.min()
+    imax = nimg.max()
+    rsimg = (255 * (nimg - imin) / (imax - imin)).astype('uint8')  # rescale to [0,255]
+    # transfer to PIL image
+    return Image.fromarray(rsimg)
 
 
 def cutout(org_img, magnitude=None):

@@ -10,7 +10,7 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": null //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_Longer train_231012_173536/checkpoint/120"
+        "resume_state": "/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_size=256_231024_155821/checkpoint/1000" //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_Longer train_231012_173536/checkpoint/120"
         //"/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_BCI_230925_151941/checkpoint/10"
         //"resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
@@ -65,7 +65,7 @@
             "which_dataset": {
                 "name": ["data.dataset", "BCI_Dataset"], // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "/mnt/data/BCI/val_5",
+                    "data_root": "/mnt/data/BCI/test",
                     "data_len": -1,
                     "image_size": [1024,1024],
                     "crop_size": [256,256]
@@ -73,8 +73,8 @@
             },
             "dataloader":{
                 "args":{
-                    "batch_size": 1,
-                    "num_workers": 2,
+                    "batch_size": 6,
+                    "num_workers": 1,
                     "shuffle": false,
                     "drop_last": false,
                     "pin_memory": true

@@ -22,8 +22,8 @@ def psnr_and_ssim(result_path):
     for i in tqdm(os.listdir(result_path)):
         if 'GT' in i:
             try:
-                fake = cv.imread(os.path.join(result_path,i))
-                real = cv.imread(os.path.join(result_path,i.replace('GT','Input')))
+                real = cv.imread(os.path.join(result_path,i))
+                fake = cv.imread(os.path.join(result_path,i.replace('GT','Out')))
                 #print(real)
                 PSNR = peak_signal_noise_ratio(fake, real)
                 psnr.append(PSNR)
@@ -33,8 +33,9 @@ def psnr_and_ssim(result_path):
                 print("there is something wrong with " + i)
         else:
             continue
-        break
+        #break
     average_psnr=sum(psnr)/len(psnr)
+    print(len(ssim))
     average_ssim=sum(ssim)/len(ssim)
     print("The average psnr is " + str(average_psnr))
     print("The average ssim is " + str(average_ssim))
