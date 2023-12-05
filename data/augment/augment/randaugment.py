@@ -34,12 +34,13 @@ from PIL import Image, ImageEnhance, ImageOps
 from .augmenters.color.hsbcoloraugmenter import HsbColorAugmenter
 from .augmenters.color.hedcoloraugmenter import HedColorAugmenter
 import random
+import torch
 
 # This signifies the max integer that the controller RNN could predict for the
 # augmentation scheme.
 _MAX_LEVEL = 10.
 def hsv(image, factor):
-    #print('image',image.shape)
+
     image=np.transpose(image,[2,0,1])
     augmentor= HsbColorAugmenter(hue_sigma_range=(-factor, factor), saturation_sigma_range=(-factor, factor), brightness_sigma_range=(0, 0))
     #To select a random magnitude value between -factor:factor, if commented the m value will be constant
@@ -48,7 +49,7 @@ def hsv(image, factor):
     
     
 def hed(image, factor):
-    #print('image',image.shape)
+
     image=np.transpose(image,[2,0,1])
     augmentor= HedColorAugmenter(haematoxylin_sigma_range=(-factor, factor), haematoxylin_bias_range=(-factor, factor),
                                             eosin_sigma_range=(-factor, factor), eosin_bias_range=(-factor, factor),
@@ -110,14 +111,14 @@ def translate_x(image, pixels, replace):
 
     image = Image.fromarray(image)
     image=image.transform(image.size, Image.AFFINE, (1, 0,pixels, 0, 1, 0), fillcolor =replace)
-    print("trans_x")
+
     return np.asarray(image)
 
 def translate_y(image, pixels, replace):
   """Equivalent of PIL Translate in Y dimension."""
   image = Image.fromarray(image)
   image=image.transform(image.size, Image.AFFINE, (1, 0, 0, 0, 1, pixels),fillcolor =replace)
-  print("trans_x")
+
   return np.asarray(image)
 
 def shear_x(image, level, replace):
@@ -325,98 +326,7 @@ def _parse_policy_info(name, prob, level, replace_value, translate_const,magnitu
 
   return (func, prob, args)
 
-
-def _apply_func_with_prob(func, image, args, prob):
-  """Apply `func` to image w/ `args` as input with probability `prob`."""
-  assert isinstance(args, tuple)
-
-  # If prob is a function argument, then this randomness is being handled
-  # inside the function, so make sure it is always called.
-  # pytype:disable=wrong-arg-types
-  if 'prob' in inspect.getargspec(func)[0]:
-    prob = 1.0
-  # pytype:enable=wrong-arg-types
-
-  # Apply the function with probability `prob`.
-  # should_apply_op = tf.cast(
-  #     tf.floor(tf.random_uniform([], dtype=tf.float32) + prob), tf.bool)
-
-  should_apply_op = torch.floor(torch.rand(1, dtype=torch.float32) + prob).to(torch.bool)
-  # augmented_image = tf.cond(
-  #     should_apply_op,
-  #     lambda: func(image, *args),
-  #     lambda: image)
-
-  augmented_image = torch.where(should_apply_op, func(image, *args), image)
-  return augmented_image
-
-
-def select_and_apply_random_policy(policies, image):
-  """Select a random policy from `policies` and apply it to `image`."""
-  #policy_to_select = tf.random_uniform([], maxval=len(policies), dtype=tf.int32)
-  policy_to_select = torch.randint(0, len_policies, (1,), dtype=torch.int32)
-
-  # Note that using tf.case instead of tf.conds would result in significantly
-  # larger graphs and would even break export for some larger policies.
-  for (i, policy) in enumerate(policies):
-    # image = tf.cond(
-    #     tf.equal(i, policy_to_select),
-    #     lambda selected_policy=policy: selected_policy(image),
-    #     lambda: image)
-    if i == policy_to_select:
-        image = selected_policy(image)
-  return image
-
-
-def build_and_apply_nas_policy(policies, image,
-                               augmentation_hparams):
-  """Build a policy from the given policies passed in and apply to image.
-  Args:
-    policies: list of lists of tuples in the form `(func, prob, level)`, `func`
-      is a string name of the augmentation function, `prob` is the probability
-      of applying the `func` operation, `level` is the input argument for
-      `func`.
-    image: tf.Tensor that the resulting policy will be applied to.
-    augmentation_hparams: Hparams associated with the NAS learned policy.
-  Returns:
-    A version of image that now has data augmentation applied to it based on
-    the `policies` pass into the function.
-  """
-  replace_value = [128, 128, 128]
-
-  # func is the string name of the augmentation function, prob is the
-  # probability of applying the operation and level is the parameter associated
-  # with the tf op.
-
-  # tf_policies are functions that take in an image and return an augmented
-  # image.
-  tf_policies = []
-  for policy in policies:
-    tf_policy = []
-    # Link string name to the correct python function and make sure the correct
-    # argument is passed into that function.
-    for policy_info in policy:
-      policy_info = list(policy_info) + [replace_value, augmentation_hparams]
-
-      tf_policy.append(_parse_policy_info(*policy_info))
-    # Now build the tf policy that will apply the augmentation procedue
-    # on image.
-    def make_final_policy(tf_policy_):
-      def final_policy(image_):
-        for func, prob, args in tf_policy_:
-          image_ = _apply_func_with_prob(
-              func, image_, args, prob)
-        return image_
-      return final_policy
-    tf_policies.append(make_final_policy(tf_policy))
-
-  augmented_image = select_and_apply_random_policy(
-      tf_policies, image)
-  return augmented_image
-
-
-
-def distort_image_with_randaugment(image, num_layers, magnitude,ra_type="Original"):
+def distort_image_with_randaugment(image, num_layers, magnitude,ra_type="Default"):
   """Applies the RandAugment policy to `image`.
   RandAugment is from the paper https://arxiv.org/abs/1909.13719,
   Args:
@@ -431,7 +341,7 @@ def distort_image_with_randaugment(image, num_layers, magnitude,ra_type="Origina
   Returns:
     The augmented version of `image`.
   """
-  #print(magnitude)
+
   replace_value = (128, 128, 128)#[128] * 3
   #tf.logging.info('Using RandAug.')
   #augmentation_hparams = contrib_training.HParams(cutout_const=40, translate_const=10)
@@ -441,14 +351,15 @@ def distort_image_with_randaugment(image, num_layers, magnitude,ra_type="Origina
   if ra_type== 'Default': 
     available_ops = ['TranslateX', 'TranslateY','ShearX', 'ShearY','Brightness', 'Sharpness','Color', 'Contrast','Rotate', 'Equalize','Identity','Hsv','Hed']  
   elif ra_type== 'Original': 
-    available_ops = ['TranslateX', 'TranslateY','ShearX', 'ShearY','Brightness', 'Sharpness']
+    available_ops = ['Color', 'Contrast','Rotate', 'Equalize','Identity','Hsv','Hed']
+
+
   for layer_num in range(num_layers):
     op_to_select = np.random.randint(low=0,high=len(available_ops))
     random_magnitude = np.random.uniform(low=0, high=magnitude)
 
-    op_to_select=len(available_ops)-1
-    random_magnitude=magnitude
-
+    # op_to_select=layer_num
+    # random_magnitude=magnitude
     image = np.asarray(image)
     for (i, op_name) in enumerate(available_ops):
         prob = np.random.uniform(low=0.9, high=1.0)
@@ -457,13 +368,13 @@ def distort_image_with_randaugment(image, num_layers, magnitude,ra_type="Origina
 
 
         if  (i== op_to_select):
-
             selected_func=func
             selected_args=args
             image= selected_func(image, *selected_args)
-            print("apply")
             
         else: 
             image=image
+    #finally transform it to Image
+    image = Image.fromarray(image)
 
   return image

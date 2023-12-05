@@ -8,6 +8,8 @@
 
     nohup python run.py -p train -c config/BCI.json -gpu '2,3' > /dev/null 2>&1&
 
+    nohup python run.py -p test -c config/BCI.json -gpu '2,3' > /dev/null 2>&1&
+
 
 
 3. Run tensorboard remotely:
@@ -31,11 +33,18 @@
           MSE loss + crop to 224
             The average psnr is 13.412870116163292
             The average ssim is 0.5150041990810806
+
+    Same as before but with data-aug:
+
+
+
+
     1-ss:
           With new loss and resize to 224
           Numbers:
             The average psnr is 16.569598711078623
             The average ssim is 0.42707161230791724
+
     Data-Augment:
 
 

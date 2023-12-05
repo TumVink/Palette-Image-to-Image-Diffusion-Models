@@ -7,7 +7,7 @@ import numpy as np
 from torchvision.utils import save_image
 import torchvision.transforms.functional as TF
 #from util.auto_augment import PathAugment
-from augment.augment.randaugment import distort_image_with_randaugment
+from .augment.augment.randaugment import distort_image_with_randaugment
 
 #from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -181,7 +181,7 @@ class ColorizationDataset(data.Dataset):
 
 
 class BCI_Dataset(data.Dataset):
-    def __init__(self, data_root, data_len=-1, image_size=[1024,1024], loader=pil_loader,crop_size=None):
+    def __init__(self, data_root, data_len=-1, image_size=[1024,1024], loader=pil_loader,crop_size=None,data_aug=None):
         self.data_root = data_root
         #print(self.data_root)
         imgs = make_dataset(data_root)
@@ -199,6 +199,7 @@ class BCI_Dataset(data.Dataset):
         self.loader = loader
         self.image_size = image_size
         self.crop_size = crop_size
+        self.data_aug = data_aug
 
     def __getitem__(self, index):
         ret = {}
@@ -210,7 +211,8 @@ class BCI_Dataset(data.Dataset):
         # AutoAug
         # AutoAug = PathAugment()
         # cond_image = AutoAug(cond_image)
-        cond_image = distort_image_with_randaugment(cond_image,6,5)
+        if self.data_aug:
+            cond_image = distort_image_with_randaugment(cond_image,2,3)
 
         if self.crop_size:
             image_placeholder = torch.zeros([3, self.image_size[0], self.image_size[0]])
@@ -242,7 +244,7 @@ if __name__ == "__main__":
         #print("\nBatch = " + str(batch_idx))
         #X = batch['gt_image']  # [3,7]
         Y = batch['cond_image']  # [3]
-        save_image(Y, 'data/viz/translate_new.png')
+        save_image(Y, 'data/viz/translate_new2.png')
         break
 
     #save_image(X, 'viz/gt_image.png')

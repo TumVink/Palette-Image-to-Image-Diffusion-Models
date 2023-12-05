@@ -10,7 +10,7 @@ import argparse
 def parse_opt():
 #Set train options
     parser = argparse.ArgumentParser(description='Evaluate options')
-    parser.add_argument('--result_path', type=str, default='/home/ge54xof/Palette-Image-to-Image-Diffusion-Models/experiments/train_size=256_231024_155821/results/val/', help='results saved path')
+    parser.add_argument('--result_path', type=str, default='experiments/test_aug_size\=256_epoch\=1800_231106_181931/results/test/', help='results saved path')
     opt = parser.parse_args()
     return opt
 opt = parse_opt()
