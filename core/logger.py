@@ -6,6 +6,7 @@ import logging
 import pandas as pd
 
 import core.util as Util
+import torch
 
 class InfoLogger():
     """
@@ -87,7 +88,7 @@ class VisualWriter():
 
         self.tb_writer_ftns = {
             'add_scalar', 'add_scalars', 'add_image', 'add_images', 'add_audio',
-            'add_text', 'add_histogram', 'add_pr_curve', 'add_embedding'
+            'add_text', 'add_histogram', 'add_pr_curve', 'add_embedding','add_image_with_boxes'
         }
         self.tag_mode_exceptions = {'add_histogram', 'add_embedding'}
         self.custom_ftns = {'close'}
@@ -117,7 +118,6 @@ class VisualWriter():
         self.writer.close()
         print('Close the Tensorboard SummaryWriter.')
 
-        
     def __getattr__(self, name):
         """
         If visualization is configured to use:
@@ -127,13 +127,25 @@ class VisualWriter():
         """
         if name in self.tb_writer_ftns:
             add_data = getattr(self.writer, name, None)
-            def wrapper(tag, data, *args, **kwargs):
-                if add_data is not None:
-                    # add phase(train/valid) tag
-                    if name not in self.tag_mode_exceptions:
-                        tag = '{}/{}'.format(self.phase, tag)
-                    add_data(tag, data, self.iter, *args, **kwargs)
-            return wrapper
+
+            if name == 'add_image_with_boxes':
+                def wrapper(tag, img,box, *args, **kwargs):
+                    if add_data is not None:
+                        # add phase(train/valid) tag
+                        if name not in self.tag_mode_exceptions:
+                            tag = '{}/{}'.format(self.phase, tag)
+                        add_data(tag, img,box, self.iter, *args, **kwargs)
+
+                return wrapper
+
+            else:
+                def wrapper(tag, data, *args, **kwargs):
+                    if add_data is not None:
+                        # add phase(train/valid) tag
+                        if name not in self.tag_mode_exceptions:
+                            tag = '{}/{}'.format(self.phase, tag)
+                        add_data(tag, data, self.iter, *args, **kwargs)
+                return wrapper
         else:
             # default action for returning methods defined in this class, set_step() for instance.
             try:
@@ -141,6 +153,17 @@ class VisualWriter():
             except AttributeError:
                 raise AttributeError("type object '{}' has no attribute '{}'".format(self.selected_module, name))
             return attr
+
+    def show_imgs_with_boxes(self,tag,img_tensor,box_tensor,labels='cropping zone'):
+        """
+        Img_tensor: [B,C,H,W]
+        box_tensor: [B,4]
+        labels: fixed = 'cropping zone'
+        """
+        #print(box_tensor.shape)
+        for i in range(img_tensor.shape[0]):
+            [x1, y1, x2, y2] = [box_tensor[i,1],box_tensor[i,0],box_tensor[i,1]+box_tensor[i,3],box_tensor[i,0]+box_tensor[i,2]]
+            self.add_image_with_boxes(tag=tag,img=img_tensor[i,:,:,:],box=torch.tensor([x1, y1, x2, y2]).reshape(-1,4),)
 
 
 class LogTracker:

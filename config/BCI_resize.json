@@ -1,5 +1,5 @@
 {
-    "name": "size=256", // experiments name
+    "name": "debug_tensorboard", // experiments name
     "gpu_ids": [2,3], // 0,1 are the GeForce3090 ones
     "seed" : -1, // random seed, seed <0 represents randomization not used
     "finetune_norm": false, // find the parameters to optimize
@@ -31,7 +31,7 @@
             "dataloader": {
                 "args":{ // arguments to initialize train_dataloader
                     "batch_size": 6, // batch size in each gpu
-                    "num_workers": 1,
+                    "num_workers": 8,
                     "shuffle": true,
                     "pin_memory": true,
                     "drop_last": false
@@ -49,8 +49,8 @@
             },
             "dataloader":{
                 "val_args":{ // arguments to initialize valid_dataloader, will overwrite the parameters in train_dataloader
-                    "batch_size": 1, // batch size in each gpu
-                    "num_workers": 4,
+                    "batch_size": 16, // batch size in each gpu
+                    "num_workers": 8,
                     "shuffle": false,
                     "pin_memory": true,
                     "drop_last": false
@@ -69,8 +69,8 @@
             },
             "dataloader":{
                 "args":{
-                    "batch_size": 6,
-                    "num_workers": 1,
+                    "batch_size": 2,
+                    "num_workers": 2,
                     "shuffle": false,
                     "drop_last": false,
                     "pin_memory": true
@@ -131,7 +131,7 @@
                         },
                         "test": {
                             "schedule": "linear",
-                            "n_timestep": 1000,
+                            "n_timestep": 200,
                             "linear_start": 1e-4,
                             "linear_end": 0.09
                         }
@@ -155,11 +155,11 @@
     },
 
     "train": { // arguments for basic training
-        "n_epoch": 1000, // max epochs, not limited now
+        "n_epoch": 10, // max epochs, not limited now
         "n_iter": 1e9, // max interations
         "val_epoch": 50, // valdation every specified number of epochs
         "save_checkpoint_epoch": 50,
-        "log_iter": 100, // log every specified number of iterations
+        "log_iter": 1, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
 

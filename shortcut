@@ -21,6 +21,13 @@
  4. Count file numbers
      ls -1 | wc -l
 
+ 5. change env file:
+
+ _draw_single_box(image, xmin, ymin, xmax, ymax, display_str, color='black', color_text='black', thickness=4)
+    in/home/ge54xof/miniconda3/envs/diffusion/lib/python3.9/site-packages/tensorboardX/summary.py
+ 
+
+
 
  Some potential ideas:
     change batchnorm to groupnorm or inverse -- donot work
@@ -36,9 +43,6 @@
 
     Same as before but with data-aug:
 
-
-
-
     1-ss:
           With new loss and resize to 224
           Numbers:
@@ -46,6 +50,9 @@
             The average ssim is 0.42707161230791724
 
     Data-Augment:
+
+
+    Cropping verify and check performance variance to diff alignment quality
 
 
 

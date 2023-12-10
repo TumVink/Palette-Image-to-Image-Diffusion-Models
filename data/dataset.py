@@ -213,6 +213,8 @@ class BCI_Dataset(data.Dataset):
         # cond_image = AutoAug(cond_image)
         if self.data_aug:
             cond_image = distort_image_with_randaugment(cond_image,2,3)
+        ret['original_gt_img'] = img
+        ret['original_conf_img'] = cond_image
 
         if self.crop_size:
             image_placeholder = torch.zeros([3, self.image_size[0], self.image_size[0]])
@@ -221,10 +223,14 @@ class BCI_Dataset(data.Dataset):
             #print(i, j, h, w)
             img = TF.crop(img,i, j, h, w)
             cond_image = TF.crop(cond_image, i, j, h, w)
+            ret['crop_coor'] = torch.tensor([i,j,h,w])
 
         img = self.tfs(img)
         #print('{}/{}/{}'.format(self.data_root, 'IHC', file_name))
         cond_image = self.tfs(cond_image)
+        ret['original_gt_img'] = self.tfs(ret['original_gt_img'])
+        ret['original_conf_img'] = self.tfs(ret['original_conf_img'])
+
 
 
 

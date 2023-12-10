@@ -64,12 +64,20 @@ class Palette(BaseModel):
         self.mask_image = data.get('mask_image')
         self.path = data['path']
         self.batch_size = len(data['path'])
+        self.original_gt_img = data.get('original_gt_img')
+        self.original_conf_img = data.get('original_conf_img')
+        self.crop_coor = data.get('crop_coor')
     
     def get_current_visuals(self, phase='train'):
+
         dict = {
             'gt_image': (self.gt_image.detach()[:].float().cpu()+1)/2,
             'cond_image': (self.cond_image.detach()[:].float().cpu()+1)/2,
+            'origin_gt_image': (self.original_gt_img.detach()[:].float().cpu()+1)/2,
+            'origin_cond_image': (self.original_conf_img.detach()[:].float().cpu()+1)/2,
+            'crop_coor': self.crop_coor.float()
         }
+
         if self.task in ['inpainting','uncropping']:
             dict.update({
                 'mask': self.mask.detach()[:].float().cpu(),
@@ -121,8 +129,15 @@ class Palette(BaseModel):
                 for key, value in self.train_metrics.result().items():
                     self.logger.info('{:5s}: {}\t'.format(str(key), value))
                     self.writer.add_scalar(key, value)
-                for key, value in self.get_current_visuals().items():
-                    self.writer.add_images(key, value)
+
+                self.visual_dict = self.get_current_visuals(phase='train')
+                for key, value in self.visual_dict.items():
+                    if key == 'origin_gt_image' or 'origin_cond_image':
+                        self.writer.show_imgs_with_boxes(key,value,self.visual_dict['crop_coor'])
+                    elif key == 'output':
+                        self.writer.add_images(key, value)
+                # for key, value in self.get_current_visuals().items():
+                #     self.writer.add_images(key, value)
             if self.ema_scheduler is not None:
                 if self.iter > self.ema_scheduler['ema_start'] and self.iter % self.ema_scheduler['ema_iter'] == 0:
                     self.EMA.update_model_average(self.netG_EMA, self.netG)
@@ -158,9 +173,15 @@ class Palette(BaseModel):
                     value = met(self.gt_image, self.output)
                     self.val_metrics.update(key, value)
                     self.writer.add_scalar(key, value)
-                for key, value in self.get_current_visuals(phase='val').items():
-                    self.writer.add_images(key, value)
-                self.writer.save_images(self.save_current_results())
+                #draw images on tensorboard
+                self.visual_dict = self.get_current_visuals(phase='val')
+                for key, value in self.visual_dict.items():
+                    if key == 'origin_gt_image' or 'origin_cond_image':
+                        self.writer.show_imgs_with_boxes(key,value,self.visual_dict['crop_coor'])
+                    elif key == 'output':
+                        self.writer.add_images(key, value)
+                    #self.writer.add_images(key, value)
+                #self.writer.save_images(self.save_current_results())
 
         return self.val_metrics.result()
 
@@ -190,8 +211,15 @@ class Palette(BaseModel):
                     value = met(self.gt_image, self.output)
                     self.test_metrics.update(key, value)
                     self.writer.add_scalar(key, value)
-                for key, value in self.get_current_visuals(phase='test').items():
-                    self.writer.add_images(key, value)
+
+                self.visual_dict = self.get_current_visuals(phase='test')
+                for key, value in self.visual_dict.items():
+                    if key in ['origin_gt_image' , 'origin_cond_image']:
+                        self.writer.show_imgs_with_boxes(key,value,self.visual_dict['crop_coor'])
+                    elif key == 'output':
+                        self.writer.add_images(key, value)
+                # for key, value in self.get_current_visuals(phase='test').items():
+                #     self.writer.add_images(key, value)
                 self.writer.save_images(self.save_current_results())
         
         test_log = self.test_metrics.result()

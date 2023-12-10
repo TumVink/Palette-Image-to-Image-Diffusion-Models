@@ -1,5 +1,5 @@
 {
-    "name": "aug_size=256_epoch=1600", // experiments name
+    "name": "debug_tensorboard", // experiments name
     "gpu_ids": [2,3], // 0,1 are the GeForce3090 ones
     "seed" : -1, // random seed, seed <0 represents randomization not used
     "finetune_norm": false, // find the parameters to optimize
@@ -34,7 +34,7 @@
             "dataloader": {
                 "args":{ // arguments to initialize train_dataloader
                     "batch_size": 6, // batch size in each gpu
-                    "num_workers": 1,
+                    "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
                     "drop_last": false
@@ -53,7 +53,7 @@
             },
             "dataloader":{
                 "val_args":{ // arguments to initialize valid_dataloader, will overwrite the parameters in train_dataloader
-                    "batch_size": 1, // batch size in each gpu
+                    "batch_size": 8, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": false,
                     "pin_memory": true,
@@ -75,7 +75,7 @@
             "dataloader":{
                 "args":{
                     "batch_size": 16,
-                    "num_workers": 1,
+                    "num_workers": 8,
                     "shuffle": false,
                     "drop_last": false,
                     "pin_memory": true
@@ -136,7 +136,7 @@
                         },
                         "test": {
                             "schedule": "linear",
-                            "n_timestep": 1000,
+                            "n_timestep": 10,
                             "linear_start": 1e-4,
                             "linear_end": 0.09
                         }
